@@ -1,0 +1,36 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная</title>
+
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">ArticlePlatform</div>
+
+    <nav class="nav">
+        <button class="nav-btn" onclick="goCreateArticle()">Создать статью</button>
+        <button class="nav-btn profile" onclick="goProfile()">Профиль</button>
+    </nav>
+</header>
+
+<main class="main">
+
+<section class="welcome">
+    <h1>Лента статей</h1>
+    <p>Читайте публикации, оценивайте и обсуждайте материалы</p>
+</section>
+
+<section id="articlesContainer" class="articles-list">
+</section>
+
+</main>
+
+<script src="{% static 'js/home.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f8ff;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    width: 420px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 30px;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 25px;
+}
+
+.tab {
+    flex: 1;
+    padding: 14px;
+    border: none;
+    background: #eef3ff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.tab.active {
+    background: #2d6cdf;
+    color: white;
+}
+
+.form h2 {
+    margin-bottom: 20px;
+    text-align: center;
+    color: #333;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 14px;
+    border: 1px solid #d8e2f0;
+    border-radius: 10px;
+    font-size: 15px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #2d6cdf;
+}
+
+button[type="submit"] {
+    width: 100%;
+    padding: 14px;
+    background: #2d6cdf;
+    border: none;
+    color: white;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+button[type="submit"]:hover {
+    background: #1f57ba;
+}
+
+.hidden {
+    display: none;
+}
+
+#message {
+    margin-top: 18px;
+    text-align: center;
+    font-size: 14px;
+}
+
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}

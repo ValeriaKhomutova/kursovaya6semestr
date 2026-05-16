@@ -1,0 +1,160 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f8ff;
+    color: #222;
+}
+
+.header {
+    height: 75px;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2d6cdf;
+}
+
+.nav {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-btn {
+    border: none;
+    padding: 12px 18px;
+    border-radius: 10px;
+    background: #eef4ff;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+.nav-btn:hover {
+    background: #dce8ff;
+}
+
+.profile {
+    background: #2d6cdf;
+    color: white;
+}
+
+.profile:hover {
+    background: #1f57ba;
+}
+
+.main {
+    width: 1100px;
+    max-width: 95%;
+    margin: 40px auto;
+}
+
+.welcome {
+    margin-bottom: 30px;
+}
+
+.welcome h1 {
+    font-size: 34px;
+    margin-bottom: 8px;
+}
+
+.welcome p {
+    color: #666;
+}
+
+.articles-list {
+    display: grid;
+    gap: 22px;
+}
+
+.article-card {
+    background: white;
+    border-radius: 18px;
+    padding: 26px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+    transition: 0.2s;
+}
+
+.article-card:hover {
+    transform: translateY(-3px);
+}
+
+.article-top {
+    cursor: pointer;
+}
+
+.article-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: #1f1f1f;
+}
+
+.article-subtitle {
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 15px;
+}
+
+.article-keywords {
+    font-size: 14px;
+    color: #2d6cdf;
+    margin-bottom: 20px;
+}
+
+.article-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    border: none;
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #eef4ff;
+    transition: 0.2s;
+}
+
+.action-btn:hover {
+    background: #dce8ff;
+}
+
+.like {
+    color: green;
+}
+
+.dislike {
+    color: crimson;
+}
+
+.review {
+    background: #2d6cdf;
+    color: white;
+}
+
+.review:hover {
+    background: #1f57ba;
+}

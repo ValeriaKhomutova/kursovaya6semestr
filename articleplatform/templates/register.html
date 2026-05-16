@@ -1,0 +1,50 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+
+    <link rel="stylesheet" href="{% static 'css/register.css' %}">
+</head>
+<body>
+
+<div class="container">
+
+    <div class="tabs">
+        <button class="tab active" onclick="showForm('login')">Вход</button>
+        <button class="tab" onclick="showForm('register')">Регистрация</button>
+    </div>
+
+    <!-- LOGIN -->
+    <form id="loginForm" class="form">
+        <h2>Вход</h2>
+
+        <input type="email" id="loginEmail" placeholder="Email" required>
+        <input type="password" id="loginPassword" placeholder="Пароль" required>
+
+        <button type="submit">Войти</button>
+    </form>
+
+    <!-- REGISTER -->
+    <form id="registerForm" class="form hidden">
+        <h2>Регистрация</h2>
+
+        <input type="email" id="regEmail" placeholder="Email" required>
+        <input type="text" id="regName" placeholder="Имя">
+        <input type="text" id="regSurname" placeholder="Фамилия">
+        <input type="text" id="regPhone" placeholder="Телефон">
+        <input type="password" id="regPassword" placeholder="Пароль" required>
+
+        <button type="submit">Создать аккаунт</button>
+    </form>
+
+    <div id="message"></div>
+
+</div>
+
+<script src="{% static 'js/register.js' %}"></script>
+</body>
+</html>
