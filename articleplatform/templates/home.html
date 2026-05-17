@@ -3,34 +3,155 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Главная</title>
 
-    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'css/home.css' %}">
 </head>
 <body>
 
 <header class="header">
-    <div class="logo">ArticlePlatform</div>
+
+    <div class="logo">
+        ArticlePlatform
+    </div>
 
     <nav class="nav">
-        <button class="nav-btn" onclick="goCreateArticle()">Создать статью</button>
-        <button class="nav-btn profile" onclick="goProfile()">Профиль</button>
+
+        <button id="createArticleBtn"
+                class="nav-btn">
+            Создать статью
+        </button>
+
+        <button id="profileBtn"
+                class="nav-btn profile">
+            Профиль
+        </button>
+        
+        <button id="logoutBtn" class="nav-btn">
+            Выйти
+        </button>
+
+        <button id="registerBtn" class="nav-btn">
+            Зарегистрироваться
+        </button>
+
     </nav>
+
 </header>
 
 <main class="main">
 
-<section class="welcome">
-    <h1>Лента статей</h1>
-    <p>Читайте публикации, оценивайте и обсуждайте материалы</p>
-</section>
+    <section class="welcome">
 
-<section id="articlesContainer" class="articles-list">
-</section>
+        <h1>Лента статей</h1>
+
+        <p>
+            Читайте публикации,
+            оценивайте и обсуждайте материалы
+        </p>
+
+    </section>
+
+    <section id="articlesContainer"
+             class="articles-list">
+    </section>
 
 </main>
 
+
+
+<!-- PROFILE MODAL -->
+
+<div id="profileModal"
+     class="modal">
+
+    <div class="modal-content">
+
+        <span id="closeProfile"
+              class="close">
+            &times;
+        </span>
+
+        <h2>Мой профиль</h2>
+
+        <div id="myArticles"></div>
+
+    </div>
+
+</div>
+
+
+
+<!-- CREATE ARTICLE MODAL -->
+
+<div id="createArticleModal"
+     class="modal">
+
+    <div class="modal-content">
+
+        <span id="closeCreate"
+              class="close">
+            &times;
+        </span>
+
+        <h2>Создать статью</h2>
+
+        <form id="articleForm">
+
+            <input type="text"
+                   id="title"
+                   placeholder="Название"
+                   required>
+
+            <input type="text"
+                   id="subtitle"
+                   placeholder="Подзаголовок"
+                   required>
+
+            <input type="text"
+                   id="specialization"
+                   placeholder="Специализация"
+                   required>
+
+            <input type="text"
+                   id="keywords"
+                   placeholder="Ключевые слова">
+
+            <input type="file"
+                    id="main_part"
+                    required>
+
+            <button type="submit">
+                Создать
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+<!-- ARTICLE MODAL -->
+
+<div id="articleModal" class="modal">
+
+    <div class="modal-content">
+
+        <span id="closeArticle"
+              class="close">
+            &times;
+        </span>
+
+        <div id="articleModalContent"></div>
+
+    </div>
+
+</div>
+
 <script src="{% static 'js/home.js' %}"></script>
+
 </body>
 </html>
