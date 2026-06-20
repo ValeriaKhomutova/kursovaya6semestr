@@ -13,3 +13,4 @@ pytest-django
 Pillow
 gunicorn
 whitenoise
+pytest-env
