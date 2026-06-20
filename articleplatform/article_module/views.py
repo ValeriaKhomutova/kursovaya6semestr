@@ -2,9 +2,11 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, permissions
 from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from .models import Article
 from .serializers import ArticleSerializer
+from users.permissions import IsAdminOrAuthor
 
 class ArticleCreate(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -18,7 +20,6 @@ class ArticleCreate(APIView):
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-from django.db.models import Q
 
 
 class ArticleList(APIView):
@@ -44,28 +45,30 @@ class MyArticleList(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
-        articles = Article.objects.filter(author=request.user).order_by('-created_at')
+
+        if request.user.role == "admin":
+            articles = Article.objects.all().order_by('-created_at')
+        else:
+            articles = Article.objects.filter(
+                author=request.user
+            ).order_by('-created_at')
+
         serializer = ArticleSerializer(articles, many=True)
+
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     
 class ArticleUpdate(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrAuthor]
 
     def get_object(self, pk):
         return get_object_or_404(Article, pk=pk)
 
     def put(self, request, pk):
         article = self.get_object(pk)
-
-        if article.author != request.user:
-            return Response(
-                {"detail": "Нет прав на редактирование"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        self.check_object_permissions(request, article)
 
         serializer = ArticleSerializer(article, data=request.data)
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -74,15 +77,9 @@ class ArticleUpdate(APIView):
 
     def patch(self, request, pk):
         article = self.get_object(pk)
-
-        if article.author != request.user:
-            return Response(
-                {"detail": "Нет прав на редактирование"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        self.check_object_permissions(request, article)
 
         serializer = ArticleSerializer(article, data=request.data, partial=True)
-
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
@@ -91,19 +88,14 @@ class ArticleUpdate(APIView):
     
 
 class ArticleDelete(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAdminOrAuthor]
 
     def get_object(self, pk):
         return get_object_or_404(Article, pk=pk)
 
     def delete(self, request, pk):
         article = self.get_object(pk)
-
-        if article.author != request.user:
-            return Response(
-                {"detail": "Нет прав на удаление"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        self.check_object_permissions(request, article)
 
         article.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
