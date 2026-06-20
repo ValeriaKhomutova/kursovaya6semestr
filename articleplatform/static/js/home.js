@@ -1,6 +1,7 @@
 const API_URL = "/article_module/api/v1";
 const REVIEW_URL = "/reviews/api/v1";
-
+let editingArticleId = null;
+let isEditMode = false;
 const container =
     document.getElementById(
         "articlesContainer"
@@ -15,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document
         .getElementById("articleForm")
-        .addEventListener("submit", createArticle);
+        .addEventListener("submit", handleArticleSubmit);
 
     document
         .getElementById("logoutBtn")
@@ -24,6 +25,14 @@ document.addEventListener("DOMContentLoaded", () => {
     document
         .getElementById("registerBtn")
         .addEventListener("click", goToRegister);
+
+    document.getElementById("confirmDeleteBtn")
+        .addEventListener("click", deleteArticle);
+
+    document.getElementById("cancelDeleteBtn")
+        .addEventListener("click", closeDeleteModal);
+    
+
 });
 
 
@@ -75,6 +84,8 @@ function initModals() {
         "click",
         () => {
 
+            resetArticleForm();
+
             createModal
                 .classList
                 .add("active");
@@ -101,12 +112,7 @@ function initModals() {
         .getElementById("closeCreate")
         .addEventListener(
             "click",
-            () => {
-
-                createModal
-                    .classList
-                    .remove("active");
-            }
+            closeArticleForm
         );
 
 
@@ -137,10 +143,7 @@ function initModals() {
             }
 
             if (e.target === createModal) {
-
-                createModal
-                    .classList
-                    .remove("active");
+                closeArticleForm();
             }
 
             if (e.target === articleModal) {
@@ -148,6 +151,10 @@ function initModals() {
                 articleModal
                     .classList
                     .remove("active");
+            }
+            const deleteModal = document.getElementById("deleteModal");
+            if (e.target === deleteModal) {
+                closeDeleteModal();
             }
         }
     );
@@ -549,17 +556,13 @@ async function submitReview(articleId) {
 async function loadMyArticles() {
 
     const token = localStorage.getItem("access");
-
-    const container =
-        document.getElementById("myArticles");
+    const container = document.getElementById("myArticles");
 
     try {
 
-        // 🔥 берём данные ИЗ JWT
         const me = parseJwt(token);
 
-        // статьи остаются как у тебя было
-        const articlesResponse = await fetch(
+        const response = await fetch(
             `${API_URL}/article/mylist/`,
             {
                 headers: {
@@ -568,18 +571,35 @@ async function loadMyArticles() {
             }
         );
 
-        const articles = await articlesResponse.json();
+        const articles = await response.json();
 
-        let articlesHtml = "";
+        let html = "";
 
         if (articles.length === 0) {
-            articlesHtml = "<p>У вас пока нет статей</p>";
+            html = "<p>У вас пока нет статей</p>";
         } else {
+
             articles.forEach(article => {
-                articlesHtml += `
+                html += `
                     <div class="my-article">
+
                         <h3>${article.title}</h3>
                         <p>${article.subtitle}</p>
+
+                        <div class="article-actions">
+
+                            <button class="action-btn review"
+                                onclick="openEditArticle(${article.id})">
+                                Редактировать
+                            </button>
+
+                            <button class="action-btn dislike"
+                                onclick="openDeleteModal(${article.id})">
+                                Удалить
+                            </button>
+
+                        </div>
+
                     </div>
                 `;
             });
@@ -587,15 +607,15 @@ async function loadMyArticles() {
 
         container.innerHTML = `
             <div class="profile-data">
-                <p><b>Email:</b> ${me.email || "—"}</p>
-                <p><b>Username:</b> ${me.name || "—"}</p>
+                <p><b>Email:</b> ${me?.email || "—"}</p>
+                <p><b>Username:</b> ${me?.name || "—"}</p>
             </div>
 
             <hr>
 
             <div class="profile-articles">
                 <h3>Мои статьи</h3>
-                ${articlesHtml}
+                ${html}
             </div>
         `;
 
@@ -605,105 +625,148 @@ async function loadMyArticles() {
     }
 }
 
-async function createArticle(e) {
+
+async function handleArticleSubmit(e) {
 
     e.preventDefault();
 
-    const token =
-        localStorage.getItem("access");
+    if (isEditMode) {
+        await updateArticle();
+    } else {
+        await createArticle();
+    }
+}
 
-    const formData =
-        new FormData();
+async function createArticle() {
+
+    const token = localStorage.getItem("access");
+
+    const formData = new FormData();
 
     formData.append(
         "title",
-        document
-            .getElementById("title")
-            .value
+        document.getElementById("title").value
     );
 
     formData.append(
         "subtitle",
-        document
-            .getElementById("subtitle")
-            .value
+        document.getElementById("subtitle").value
     );
 
     formData.append(
         "specialization",
-        document
-            .getElementById("specialization")
-            .value
+        document.getElementById("specialization").value
     );
 
     formData.append(
         "keywords",
-        document
-            .getElementById("keywords")
-            .value
+        document.getElementById("keywords").value
     );
 
-    formData.append(
-        "main_part",
-        document
-            .getElementById("main_part")
-            .files[0]
-    );
+    const file =
+        document.getElementById("main_part").files[0];
+
+    if (file) {
+        formData.append("main_part", file);
+    }
 
     try {
 
-        const response =
-            await fetch(
-                `${API_URL}/article/create/`,
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Authorization":
-                            `Bearer ${token}`
-                    },
-
-                    body: formData
-                }
-            );
+        const response = await fetch(
+            `${API_URL}/article/create/`,
+            {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                body: formData
+            }
+        );
 
         if (!response.ok) {
-
-            const error =
-                await response.json();
-
-            console.log(error);
-
             throw new Error();
         }
 
-        alert("Статья создана");
+        showToast("Статья создана");
 
-        document
-            .getElementById(
-                "createArticleModal"
-            )
-            .classList
-            .remove("active");
-
-        document
-            .getElementById(
-                "articleForm"
-            )
-            .reset();
+        closeArticleForm();
 
         loadArticles();
+        loadMyArticles();
 
     } catch(error) {
 
         console.log(error);
 
-        alert(
-            "Ошибка создания статьи"
-        );
+        showToast("Ошибка создания статьи", "error");
     }
 }
 
+
+async function updateArticle() {
+
+    const token = localStorage.getItem("access");
+
+    const formData = new FormData();
+
+    formData.append(
+        "title",
+        document.getElementById("title").value
+    );
+
+    formData.append(
+        "subtitle",
+        document.getElementById("subtitle").value
+    );
+
+    formData.append(
+        "specialization",
+        document.getElementById("specialization").value
+    );
+
+    formData.append(
+        "keywords",
+        document.getElementById("keywords").value
+    );
+
+    const file =
+        document.getElementById("main_part").files[0];
+
+    if (file) {
+        formData.append("main_part", file);
+    }
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/article/${editingArticleId}/update/`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                },
+                body: formData
+            }
+        );
+
+        if (!response.ok) {
+            throw new Error();
+        }
+
+        showToast("Статья обновлена");
+
+        closeArticleForm();
+
+        loadArticles();
+        loadMyArticles();
+
+    } catch(error) {
+
+        console.log(error);
+
+        showToast("Ошибка обновления", "error");
+    }
+}
 
 function isAuth() {
     return !!localStorage.getItem("access");
@@ -711,18 +774,37 @@ function isAuth() {
 
 function updateAuthUI() {
 
-    const logoutBtn = document.getElementById("logoutBtn");
-    const registerBtn = document.getElementById("registerBtn");
+    const logoutBtn =
+        document.getElementById("logoutBtn");
+
+    const registerBtn =
+        document.getElementById("registerBtn");
+
+    const createArticleBtn =
+        document.getElementById("createArticleBtn");
+
+    const profileBtn =
+        document.getElementById("profileBtn");
 
     if (isAuth()) {
 
         logoutBtn.style.display = "inline-block";
+
         registerBtn.style.display = "none";
+
+        createArticleBtn.style.display = "inline-block";
+
+        profileBtn.style.display = "inline-block";
 
     } else {
 
         logoutBtn.style.display = "none";
+
         registerBtn.style.display = "inline-block";
+
+        createArticleBtn.style.display = "none";
+
+        profileBtn.style.display = "none";
     }
 }
 
@@ -744,4 +826,242 @@ function parseJwt(token) {
     } catch (e) {
         return null;
     }
+}
+
+
+async function searchArticles(query) {
+    try {
+        const response = await fetch(
+            `${API_URL}/article/list/?search=${encodeURIComponent(query)}`
+        );
+
+        const articles = await response.json();
+
+        container.innerHTML = "";
+
+        articles.forEach(article => {
+
+            container.innerHTML += `
+                <div class="article-card">
+
+                    <div
+                        class="article-top"
+                        onclick='openArticle(${JSON.stringify(article)})'
+                    >
+
+                        <div class="article-title">
+                            ${article.title}
+                        </div>
+
+                        <div class="article-subtitle">
+                            ${article.subtitle}
+                        </div>
+
+                        <div class="article-meta">
+
+                            <span>
+                                Автор:
+                                ${article.author.email}
+                            </span>
+
+                            <span>
+                                Специализация:
+                                ${article.specialization}
+                            </span>
+
+                            <span>
+                                Отзывы:
+                                ${article.reviews_count}
+                            </span>
+
+                        </div>
+
+                        <div class="article-keywords">
+                            ${article.keywords || ""}
+                        </div>
+
+                    </div>
+
+                </div>
+            `;
+        });
+
+    } catch (error) {
+        console.log(error);
+        container.innerHTML = "Ошибка поиска";
+    }
+}
+
+let searchTimeout;
+
+document.getElementById("searchInput")
+    .addEventListener("input", (e) => {
+
+        const value = e.target.value.trim();
+
+        clearTimeout(searchTimeout);
+
+        searchTimeout = setTimeout(() => {
+
+            if (value === "") {
+                loadArticles(); // показать все статьи
+            } else {
+                searchArticles(value); // поиск
+            }
+
+        }, 100);
+
+    });
+
+
+
+async function deleteArticle() {
+
+    const btn = document.getElementById("confirmDeleteBtn");
+    btn.disabled = true;
+
+    const token = localStorage.getItem("access");
+
+    try {
+
+        const response = await fetch(
+            `${API_URL}/article/${deletingArticleId}/delete/`,
+            {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            }
+        );
+
+        if (!response.ok) throw new Error();
+
+        closeDeleteModal();
+
+        showToast("Статья удалена");
+
+        loadArticles();
+        loadMyArticles();
+
+    } catch (error) {
+
+        console.log(error);
+        showToast("Ошибка удаления", "error");
+
+    } finally {
+        btn.disabled = false;
+    }
+}
+function showToast(message, type = "success") {
+    const toast = document.getElementById("toast");
+    if (!toast) return;
+
+    toast.textContent = message;
+    toast.className = "toast show";
+
+    if (type === "error") {
+        toast.classList.add("error");
+    }
+
+    setTimeout(() => {
+        toast.className = "toast";
+    }, 2000);
+}
+
+let deletingArticleId = null;
+
+
+function openDeleteModal(articleId) {
+    deletingArticleId = articleId;
+
+    document
+        .getElementById("deleteModal")
+        .classList.add("active");
+}
+
+
+function closeDeleteModal() {
+    document
+        .getElementById("deleteModal")
+        .classList.remove("active");
+
+    deletingArticleId = null;
+}
+
+
+async function openEditArticle(id) {
+
+    try {
+
+        const response =
+            await fetch(`${API_URL}/article/list/`);
+
+        const articles =
+            await response.json();
+
+        const article =
+            articles.find(a => a.id === id);
+
+        if (!article) return;
+
+        editingArticleId = id;
+        isEditMode = true;
+
+        document.getElementById("title").value =
+            article.title;
+
+        document.getElementById("subtitle").value =
+            article.subtitle;
+
+        document.getElementById("specialization").value =
+            article.specialization;
+
+        document.getElementById("keywords").value =
+            article.keywords || "";
+
+        document.getElementById("main_part").required = false;
+
+        document.querySelector(
+            "#articleForm button[type='submit']"
+        ).textContent = "Сохранить";
+
+        document.querySelector(
+            "#createArticleModal h2"
+        ).textContent = "Редактировать статью";
+
+        document.getElementById(
+            "createArticleModal"
+        ).classList.add("active");
+
+    } catch (e) {
+
+        console.log(e);
+    }
+}
+
+function resetArticleForm() {
+
+    isEditMode = false;
+    editingArticleId = null;
+
+    document.getElementById("articleForm").reset();
+
+    document.getElementById("main_part").required = true;
+
+    document.querySelector(
+        "#articleForm button[type='submit']"
+    ).textContent = "Создать";
+
+    document.querySelector(
+        "#createArticleModal h2"
+    ).textContent = "Создать статью";
+}
+
+function closeArticleForm() {
+
+    document
+        .getElementById("createArticleModal")
+        .classList.remove("active");
+
+    resetArticleForm();
 }
