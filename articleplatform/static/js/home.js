@@ -432,6 +432,18 @@ async function sendReaction(
 
     try {
 
+        const body = {
+            article: articleId,
+            text: ""
+        };
+
+        // отправляем только одно поле
+        if (isLike) {
+            body.like = true;
+        } else {
+            body.dislike = true;
+        }
+
         await fetch(
             `${REVIEW_URL}/review/create/`,
             {
@@ -445,18 +457,12 @@ async function sendReaction(
                         `Bearer ${token}`
                 },
 
-                body: JSON.stringify({
-                    article: articleId,
-                    text: "",
-                    like: isLike,
-                    dislike: !isLike
-                })
+                body: JSON.stringify(body)
             }
         );
 
         await loadArticles();
 
-        // обновить открытую статью
         const response =
             await fetch(
                 `${API_URL}/article/list/`
@@ -499,6 +505,18 @@ async function submitReview(articleId) {
 
     try {
 
+        const body = {
+            article: articleId,
+            text: text
+        };
+
+        // отправляем только одно поле
+        if (type === "like") {
+            body.like = true;
+        } else {
+            body.dislike = true;
+        }
+
         await fetch(
             `${REVIEW_URL}/review/create/`,
             {
@@ -512,16 +530,7 @@ async function submitReview(articleId) {
                         `Bearer ${token}`
                 },
 
-                body: JSON.stringify({
-
-                    article: articleId,
-
-                    text: text,
-
-                    like: type === "like",
-
-                    dislike: type === "dislike"
-                })
+                body: JSON.stringify(body)
             }
         );
 
